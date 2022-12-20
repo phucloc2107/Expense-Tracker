@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
+import React, { useRef } from 'react';
+import { View, Text, TouchableOpacity, Image, ScrollView, FlatList, StyleSheet, Animated } from 'react-native';
 
 import { COLORS, FONTS, SIZES, icons } from '../constants';
 
@@ -206,8 +206,12 @@ const Home = () => {
         }
     ]
 
+    const categoryListHeightAnimationValue = React.useRef(new Animated.Value(115)).current;
+
     const [categories, setCategories] = React.useState(categoriesData);
     const [viewMode, setViewMode] = React.useState("chart");
+    const [selectedCategory, setSelectedCategory] = React.useState(null);
+    const [showMoreToggle, setShowMoreToggle] = React.useState(false);
 
     function renderNavBar() {
         return (
@@ -229,7 +233,7 @@ const Home = () => {
                         style={{
                             width: 30,
                             height: 30,
-                            tincolor: COLORS.primary
+                            tintColor: COLORS.primary
                         }}
                     />
                 </TouchableOpacity>
@@ -243,7 +247,7 @@ const Home = () => {
                         style={{
                             width: 30,
                             height: 30,
-                            tincolor: COLORS.primary
+                            tintColor: COLORS.primary
                         }}
                     />
                 </TouchableOpacity>
@@ -281,7 +285,7 @@ const Home = () => {
                             style={{
                                 width: 20,
                                 height: 20,
-                                tincolor: COLORS.lightBlue
+                                tintColor: COLORS.lightBlue
                             }}
                         />
                     </View>
@@ -325,7 +329,7 @@ const Home = () => {
                             style={{
                                 width: 20,
                                 height: 20,
-                                tincolor: viewMode == "chart" ? COLORS.white : COLORS.darkgray
+                                tintColor: viewMode == "chart" ? COLORS.white : COLORS.darkgray
                             }}
                         />
                     </TouchableOpacity>
@@ -345,11 +349,89 @@ const Home = () => {
                             style={{
                                 width: 20,
                                 height: 20,
-                                tincolor: viewMode == "list" ? COLORS.white : COLORS.darkgray
+                                tintColor: viewMode == "list" ? COLORS.white : COLORS.darkgray
                             }}
                         />
                     </TouchableOpacity>
                 </View>
+            </View>
+        )
+    }
+
+    function renderCategoryList() {
+
+        const renderItem = ({ item }) => {
+            return (
+                <TouchableOpacity style={{
+                    flex: 1,
+                    flexDirection: 'row',
+                    margin: 5,
+                    paddingVertical: SIZES.radius,
+                    paddingHorizontal: SIZES.padding,
+                    borderRadius: 5,
+                    backgroundColor: COLORS.white,
+                    ...styles.shadow
+                }}
+                    onPress={() => setSelectedCategory(item)}
+                >
+                    <Image
+                        source={item.icon}
+                        style={{
+                            width: 20,
+                            height: 20,
+                            tintColor: item.color
+                        }}
+                    />
+                    <Text style={{ marginLeft: SIZES.base, color: COLORS.primary, ...FONTS.h4 }}>{item.name}</Text>
+                </TouchableOpacity>
+            )
+        }
+
+        return (
+            <View style={{ paddingHorizontal: SIZES.padding - 5 }}>
+                <Animated.View style={{ height: categoryListHeightAnimationValue }}>
+                    <FlatList
+                        data={categories}
+                        renderItem={renderItem}
+                        keyExtractor={item => `${item.id}`}
+                        numColumns={2}
+                    />
+                </Animated.View>
+
+                <TouchableOpacity style={{
+                    flexDirection: 'row',
+                    marginVertical: SIZES.base,
+                    justifyContent: 'center'
+                }}
+                    onPress={() => {
+                        if (showMoreToggle) {
+                            Animated.timing(categoryListHeightAnimationValue, {
+                                toValue: 115,
+                                duration: 300,
+                                useNativeDriver: false
+                            }).start()
+                        } else {
+                            Animated.timing(categoryListHeightAnimationValue, {
+                                toValue: 172.5,
+                                duration: 300,
+                                useNativeDriver: false
+                            }).start()
+                        }
+
+                        setShowMoreToggle(!showMoreToggle)
+                    }}
+                >
+                    <Text style={{ ...FONTS.body4 }}>{showMoreToggle ? "LESS" : "MORE"}</Text>
+                    <Image
+                        source={showMoreToggle ? icons.up_arrow : icons.down_arrow}
+                        style={{
+                            margin: 5,
+                            width: 15,
+                            height: 15,
+                            alignSelf: 'center'
+                        }}
+                    />
+                </TouchableOpacity>
             </View>
         )
     }
@@ -364,8 +446,30 @@ const Home = () => {
 
             {/* Category Header Section */}
             {renderCategoryHeaderSection()}
+
+            <ScrollView contentContainerStyle={{ paddingBottom: 60 }}>
+                {
+                    viewMode == "list" &&
+                    <View>
+                        {renderCategoryList()}
+                    </View>
+                }
+            </ScrollView>
         </View>
     )
 }
+
+const styles = StyleSheet.create({
+    shadow: {
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 2,
+            height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 3
+    }
+})
 
 export default Home;
