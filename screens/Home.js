@@ -589,6 +589,11 @@ const Home = () => {
         return finalChartData;
     }
 
+    function setSelectCategoryByName(name) {
+        let category = categories.filter(a => a.name == name)
+        setSelectedCategory(category[0])
+    }
+
     function renderChart() {
 
         let chartData = processCategoryDataToDisplay()
@@ -598,27 +603,45 @@ const Home = () => {
         return (
             <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                 <VictoryPie
+
                     data={chartData}
-                    colorScale={colorScales}
                     labels={(datum) => `${datum.y}`}
-                    radius={SIZES.width * 0.4 - 10}
+                    radius={({ datum }) =>
+                        (selectedCategory && selectedCategory.name == datum.name) ? SIZES.width * 0.4 : SIZES.width * 0.4 - 10}
                     innerRadius={70}
                     labelRadius={({ innerRadius }) => (SIZES.width * 0.4 + innerRadius) / 2.5}
                     style={{
-                        labels: { fill: COLORS.white, ...FONTS.body3 },
+                        labels: { fill: "white", ...FONTS.body3 },
                         parent: {
                             ...styles.shadow
-                        }
+                        },
                     }}
                     width={SIZES.width * 0.8}
                     height={SIZES.width * 0.8}
+                    colorScale={colorScales}
+                    events={[{
+                        target: "data",
+                        eventHandlers: {
+                            onPress: () => {
+                                return [{
+                                    target: "labels",
+                                    mutation: (props) => {
+                                        let categoryName = chartData[props.index].name
+                                        setSelectCategoryByName(categoryName)
+                                    }
+                                }]
+                            }
+                        }
+                    }]}
+
                 />
 
-                <View style={{ position: "absolute", top: "42%", left: '42%' }}>
-                    <Text style={{ ...FONTS.h1, textAlign: "center", fontWeight: 'bold' }}>{totalExpenseCount}</Text>
+                <View style={{ position: 'absolute', top: '42%', left: "42%" }}>
+                    <Text style={{ ...FONTS.h1, textAlign: 'center' }}>{totalExpenseCount}</Text>
                     <Text style={{ ...FONTS.body3, textAlign: 'center' }}>Expenses</Text>
                 </View>
             </View>
+
         )
     }
 
