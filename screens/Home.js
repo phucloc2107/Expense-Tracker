@@ -607,6 +607,7 @@ const Home = () => {
                     data={chartData}
                     labels={(datum) => `${datum.y}`}
                     radius={({ datum }) =>
+
                         (selectedCategory && selectedCategory.name == datum.name) ? SIZES.width * 0.4 : SIZES.width * 0.4 - 10}
                     innerRadius={70}
                     labelRadius={({ innerRadius }) => (SIZES.width * 0.4 + innerRadius) / 2.5}
@@ -645,6 +646,64 @@ const Home = () => {
         )
     }
 
+    function renderExpenseSumary() {
+
+        let data = processCategoryDataToDisplay()
+
+        const renderItem = ({ item }) => {
+            return (
+                <TouchableOpacity style={{
+                    flexDirection: 'row',
+                    height: 40,
+                    paddingHorizontal: SIZES.radius,
+                    borderRadius: 10,
+                    backgroundColor: (selectedCategory && selectedCategory.name == item.name) ? item.color : COLORS.white
+                }}
+                    onPress={() => {
+                        let categoryName = item.name
+                        setSelectCategoryByName(categoryName)
+                    }}
+                >
+                    {/* Name Category */}
+                    <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+                        <View style={{
+                            width: 20,
+                            height: 20,
+                            backgroundColor: (selectedCategory && selectedCategory.name == item.name) ? COLORS.white : item.color,
+                            borderRadius: 5
+                        }}>
+
+                        </View>
+                        <Text style={{
+                            marginLeft: SIZES.base, color: (selectedCategory && selectedCategory.name == item.name)
+                                ? COLORS.white : COLORS.primary, ...FONTS.h3
+                        }}>{item.name}
+                        </Text>
+                    </View>
+
+                    {/* Expenses */}
+                    <View style={{ justifyContent: 'center' }}>
+                        <Text style={{
+                            color: (selectedCategory && selectedCategory.name == item.name) ? COLORS.white : COLORS.primary, ...FONTS.h3
+                        }}>
+                            {item.y} USD - {item.label}
+                        </Text>
+                    </View>
+                </TouchableOpacity>
+            )
+        }
+
+        return (
+            <View style={{ padding: SIZES.padding }}>
+                <FlatList
+                    data={data}
+                    renderItem={renderItem}
+                    keyExtractor={item => `${item.id}`}
+                />
+            </View>
+        )
+    }
+
     return (
         <View style={{ flex: 1, backgroundColor: COLORS.lightGray2 }}>
             {/*  Nav bar section */}
@@ -668,6 +727,7 @@ const Home = () => {
                     viewMode == "chart" &&
                     <View>
                         {renderChart()}
+                        {renderExpenseSumary()}
                     </View>
                 }
             </ScrollView>
